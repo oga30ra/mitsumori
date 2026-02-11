@@ -19,7 +19,7 @@ npm run dev
 
 ### Redis（推奨）
 
-`.env.example` を参考に `UPSTASH_REDIS_REST_URL` と `UPSTASH_REDIS_REST_TOKEN` を設定してください。
+`.env` に `UPSTASH_REDIS_REST_URL` と `UPSTASH_REDIS_REST_TOKEN` を設定してください。
 
 - **ローカルで環境変数なしでも動きます**（メモリ保存フォールバック）が、プロセス再起動で消えます。
 - ルームの保持時間（TTL）は `PP_ROOM_TTL_SECONDS`（秒）で調整できます（デフォルト2時間）。
