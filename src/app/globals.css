@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --fuji-sky: #f8c7c4;
+  --fuji-red: #e05662;
+  --fuji-indigo: #1f2a6b;
+  --fuji-fog: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: transparent;
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+html {
+  /* Red-Fuji inspired background (Safari-friendly gradients) */
+  background:
+    radial-gradient(circle at 50% 0%, rgba(248, 199, 196, 0.55) 0%, rgba(248, 199, 196, 0.20) 46%, rgba(248, 199, 196, 0) 74%),
+    radial-gradient(circle at 55% 28%, rgba(224, 86, 98, 0.24) 0%, rgba(224, 86, 98, 0) 66%),
+    radial-gradient(circle at 50% 78%, rgba(31, 42, 107, 0.20) 0%, rgba(31, 42, 107, 0) 64%),
+    linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, #fff9f8 0%, #f9e7e6 58%, #f1a6aa 76%, #5562a6 100%);
+  background-attachment: fixed;
+  background-color: var(--background);
+}
