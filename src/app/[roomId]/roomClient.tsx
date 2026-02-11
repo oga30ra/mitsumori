@@ -33,6 +33,8 @@ export default function RoomClient({ roomId }: { roomId: string }) {
   const [busy, setBusy] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
   const pollRef = useRef<number | null>(null);
+  const inFlightRef = useRef(false);
+  const [pollingEnabled, setPollingEnabled] = useState(true);
 
   const cards = useMemo(() => {
     const pack = room?.cardPack ?? ("goat" as CardPackId);
@@ -49,16 +51,27 @@ export default function RoomClient({ roomId }: { roomId: string }) {
     return { avg: average(votes), sd: standardDeviation(votes) };
   }, [room]);
 
-  async function refresh() {
+  async function refresh(opts?: { force?: boolean }) {
     if (!validRoomId) return;
+    if (!opts?.force && !pollingEnabled) return;
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     try {
       const res = await fetch(`/api/rooms/${roomId}`, { cache: "no-store" });
       const data = (await res.json()) as RoomView | { error?: string };
-      if (!res.ok) throw new Error(("error" in data && data.error) || "取得に失敗しました。");
+      if (!res.ok) {
+        const message = ("error" in data && data.error) || "取得に失敗しました。";
+        setError(message);
+        // If the room doesn't exist, stop auto polling.
+        if (res.status === 404) setPollingEnabled(false);
+        return;
+      }
       setRoom(data as RoomView);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "取得に失敗しました。");
+    } finally {
+      inFlightRef.current = false;
     }
   }
 
@@ -82,18 +95,28 @@ export default function RoomClient({ roomId }: { roomId: string }) {
     }
   }
 
+  // initial fetch on room change
   useEffect(() => {
-    refresh();
+    setPollingEnabled(true);
+    void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
+  // polling timer
+  useEffect(() => {
     if (pollRef.current) window.clearInterval(pollRef.current);
+    pollRef.current = null;
+    if (!pollingEnabled) return;
+
     pollRef.current = window.setInterval(() => {
-      refresh();
+      void refresh();
     }, 1000);
     return () => {
       if (pollRef.current) window.clearInterval(pollRef.current);
       pollRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId]);
+  }, [roomId, pollingEnabled]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -150,7 +173,9 @@ export default function RoomClient({ roomId }: { roomId: string }) {
             <div className="flex flex-col items-end gap-2">
               <button
                 className="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50"
-                onClick={() => refresh()}
+                onClick={() => {
+                  void refresh({ force: true });
+                }}
                 disabled={busy}
               >
                 更新

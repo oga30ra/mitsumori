@@ -67,13 +67,20 @@ export async function getRoom(roomId: RoomId): Promise<RoomState | null> {
   const redis = getRedis();
   if (!redis) return memoryGet(roomId);
 
-  const raw = await redis.get<string>(roomKey(roomId));
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as RoomState;
-  } catch {
-    return null;
+  const raw = await redis.get(roomKey(roomId));
+  if (raw == null) return null;
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as RoomState;
+    } catch {
+      return null;
+    }
   }
+  // If the value was stored as JSON (non-string), Upstash may deserialize it.
+  if (typeof raw === "object") {
+    return raw as RoomState;
+  }
+  return null;
 }
 
 export async function setRoom(room: RoomState): Promise<void> {
