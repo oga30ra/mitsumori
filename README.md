@@ -1,4 +1,4 @@
-## Planning Poker
+## MitsuMori
 
 「ルーム作成 → 参加 → 投票 →（全員投票で自動公開 / 管理者による強制公開）→ リセット」を、Next.js（App Router）で実装した簡易プランニングポーカーです。
 
@@ -32,7 +32,7 @@ npm run dev
   - 全投票者が投票すると自動で公開
   - ルーム作成者（管理者）は `Reveal`（強制公開）や `Reset` が可能
 
-## Deploy on Vercel
+## Deploy on Server like Vercel
 
 - Environment Variables に以下を設定
   - `UPSTASH_REDIS_REST_URL`
